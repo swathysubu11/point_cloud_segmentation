@@ -46,8 +46,10 @@ def train(args):
             labels = json.load(f)
             num_classes = len(labels.keys())
     except FileNotFoundError:
+        print(args.dataset)
         num_classes = int(input("Number of distinct classes in the dataset: "))
-
+    print(123)
+    print(args.dataset)
     train_loader, val_loader = data_loaders(
         args.dataset,
         args.dataset_sampling,
@@ -57,7 +59,7 @@ def train(args):
     )
 
     d_in = next(iter(train_loader))[0].size(-1)
-
+    print()
     model = RandLANet(
         d_in,
         num_classes,
@@ -93,7 +95,9 @@ def train(args):
     with SummaryWriter(logs_dir) as writer:
         for epoch in range(first_epoch, args.epochs+1):
             print(f'=== EPOCH {epoch:d}/{args.epochs:d} ===')
+            
             t0 = time.time()
+            print(t0)
             # Train
             model.train()
 
@@ -101,6 +105,7 @@ def train(args):
             losses = []
             accuracies = []
             ious = []
+            print('hello')
 
             # iterate over dataset
             for points, labels in tqdm(train_loader, desc='Training', leave=False):
@@ -204,10 +209,10 @@ if __name__ == '__main__':
     misc = parser.add_argument_group('Miscellaneous')
 
     base.add_argument('--dataset', type=Path, help='location of the dataset',
-                        default='datasets/s3dis/subsampled')
+                        default='data/s3dis/subsampled')
 
     expr.add_argument('--epochs', type=int, help='number of epochs',
-                        default=50)
+                        default=5)
     expr.add_argument('--load', type=str, help='model to load',
                         default='')
 
@@ -238,7 +243,7 @@ if __name__ == '__main__':
     misc.add_argument('--name', type=str, help='name of the experiment',
                         default=None)
     misc.add_argument('--num_workers', type=int, help='number of threads for loading data',
-                        default=0)
+                        default=5)
     misc.add_argument('--save_freq', type=int, help='frequency of saving checkpoints',
                         default=10)
 

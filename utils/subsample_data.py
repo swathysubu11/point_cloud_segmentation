@@ -10,8 +10,9 @@ from tools import Config as cfg
 from tools import DataProcessing as DP
 import cpp_wrappers.cpp_subsampling.grid_subsampling as cpp_subsampling
 
-ROOT_PATH = (Path(__file__)  / '..' / '..').resolve()
-DATASET_PATH = ROOT_PATH / 'datasets' / 's3dis'
+ROOT_PATH = (Path(__file__)  / '..' / '..' / 'data').resolve()
+print(ROOT_PATH)
+DATASET_PATH = ROOT_PATH / 's3dis'
 NEW_PATH = DATASET_PATH / 'subsampled'
 LABELS_PATH = DATASET_PATH / 'classes.json'
 TRAIN_PATH = 'train'

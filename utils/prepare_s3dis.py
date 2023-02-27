@@ -4,8 +4,8 @@ import numpy as np
 from pathlib import Path
 import warnings
 
-ROOT_PATH = (Path(__file__) / '..' / '..').resolve()
-DATASET_PATH = ROOT_PATH / 'datasets' / 's3dis'
+ROOT_PATH = (Path(__file__) / '..' / '..' / 'data').resolve()
+DATASET_PATH = ROOT_PATH / 's3dis'
 RAW_PATH = DATASET_PATH / 'Stanford3dDataset_v1.2'
 LABELS_PATH = DATASET_PATH / 'classes.json'
 TRAIN_PATH = DATASET_PATH / 'train'
@@ -26,6 +26,7 @@ else:
 for area_number in range(1,7):
     print(f'Reencoding point clouds of area {area_number:d}')
     dir = RAW_PATH / f'Area_{area_number:d}'
+    print(dir)
     if not dir.exists():
         warnings.warn(f'Area {area_number:d} not found')
         continue

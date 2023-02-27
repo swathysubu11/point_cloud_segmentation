@@ -1,12 +1,13 @@
 import numpy as np
 from pathlib import Path
 from tqdm import tqdm
-
+import os
 from ply import write_ply
 
 output_type = 'npy'
 i_dont_have_a_lot_of_memory_ok = True
-ROOT_PATH = (Path(__file__) / '..' / '..').resolve()
+ROOT_PATH = (Path(__file__) / '..' / '..' / 'data').resolve()
+print(ROOT_PATH)
 DATASET_PATH = ROOT_PATH / 'semantic3d'
 RAW_PATH = DATASET_PATH / 'original_data'
 TRAIN_PATH = DATASET_PATH / 'train'
@@ -44,26 +45,42 @@ for pc_path in RAW_PATH.glob('*.txt'):
             labels = np.loadtxt(labels_path, dtype=np.float32)
             training_data = True
             dir = VAL_PATH if '3' in name else TRAIN_PATH
-        bunchsize = 1e10^5
+        bunchsize = (10)**5
         index = 0
         points = []
 
         with open(pc_path, 'r') as file :
             for line in tqdm(file):
-                points.append(np.loadtxt(line, dtype=np.float32))
+                points.append(np.array(line.split(' ')).astype(np.float32))
                 if len(points) == bunchsize:
                     points = np.array(points)
-                    prev_data = np.load(dir / pc_name)
+                    try:
+                        prev_data = np.load(dir / pc_name)
+                    except:
+                        pc_file=os.path.join(dir, pc_name)
+                        if training_data:
+                            prev_data = np.empty((0, 8))
+                        else:
+                            prev_data = np.empty((0, 7))
+                        np.save(pc_file, prev_data)
                     if training_data :
-                        np.save(dir / pc_name, np.concatenate((prev_data, np.vstack((points.T, labels[index*bunchsize:(index+1)*bunchsize])).T)))
+                        print('did i get here')
+                        np.save(dir / pc_name, np.concatenate((prev_data, np.transpose(np.vstack((np.transpose(points), labels[index*bunchsize:]))))))
                     else :
                         np.save(dir / pc_name, np.concatenate((prev_data, points)))
                     points = []
                     index += 1
-            points = np.array(points)
-            prev_data = np.load(dir / pc_name)
+            try:
+                prev_data = np.load(dir / pc_name)
+            except:
+                pc_file=os.path.join(dir, pc_name)
+                if training_data:
+                    prev_data = np.empty((0, 8))
+                else:
+                    prev_data = np.empty((0, 7))
+                np.save(pc_file, prev_data)
             if training_data :
-                np.save(dir / pc_name, np.concatenate((prev_data, np.vstack((points.T, labels[index*bunchsize:])).T)))
+                np.save(dir / pc_name, np.concatenate((prev_data, np.transpose(np.vstack((np.transpose(points), labels[index*bunchsize:]))))))
             else :
                 np.save(dir / pc_name, np.concatenate((prev_data, points)))
 
