@@ -11,7 +11,7 @@ from utils.ply import read_ply, write_ply
 
 t0 = time.time()
 
-path = Path('datasets') / 's3dis' / 'subsampled' / 'test'
+path = Path('data') / 's3dis' / 'subsampled' 
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -24,14 +24,15 @@ d_in = 6
 num_classes = 14
 
 model = RandLANet(d_in, num_classes, 16, 4, device)
-model.load_state_dict(torch.load('runs/2020-04-11_17:03/checkpoint_10.pth')['model_state_dict'])
+# model.load_state_dict(torch.load('runs/2020-04-11_17:03/checkpoint_10.pth')['model_state_dict'])
 model.eval()
-
+#/home/swathy/Documents/project/point_cloud/RandLA-Net-pytorch/runs/2023-02-27_21:46
 points, labels = next(iter(loader))
 
 print('Predicting labels...')
 with torch.no_grad():
     points = points.to(device)
+    print(points.shape)
     labels = labels.to(device)
     scores = model(points)
     predictions = torch.max(scores, dim=-2).indices

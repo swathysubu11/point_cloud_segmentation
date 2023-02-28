@@ -14,7 +14,7 @@ class Config:
     num_points = 40960  # Number of input points
     sub_grid_size = 0.04  # preprocess_parameter
 
-    train_steps = 200  # Number of steps per epochs
+    train_steps = 100  # Number of steps per epochs
     val_steps = 100    # Number of validation steps per epoch
 
     sampling_type = 'active_learning'

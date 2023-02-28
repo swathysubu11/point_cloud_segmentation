@@ -2,21 +2,11 @@ import time
 import torch
 import torch.nn as nn
 
-#try:
-#    from torch_points import knn
-#except (ModuleNotFoundError, ImportError):
-#    from torch_points_kernels import knn
+try:
+    from torch_points import knn
+except (ModuleNotFoundError, ImportError):
+    from torch_points_kernels import knn
 
-def knns(coords, query_coords, k):
-    # Compute pairwise distance between coords and query_coords
-    dist2 = torch.sum(coords**2, dim=1, keepdim=True) + \
-            torch.sum(query_coords**2, dim=1) - \
-            2.0 * torch.matmul(coords, query_coords.t())
-    
-    # Find indices of the k nearest neighbors
-    _, indices = torch.topk(dist2, k=k, dim=1, largest=False)
-    
-    return indices
 
 class SharedMLP(nn.Module):
     def __init__(
@@ -179,7 +169,7 @@ class LocalFeatureAggregation(nn.Module):
             -------
             torch.Tensor, shape (B, 2*d_out, N, 1)
         """
-        knn_output = knns(coords.cpu().contiguous().view(-1, 3), coords.cpu().contiguous().view(-1, 3), self.num_neighbors)
+        knn_output = knn(coords.cpu().contiguous(), coords.cpu().contiguous(), self.num_neighbors)
 
         x = self.mlp1(features)
 
@@ -284,7 +274,7 @@ class RandLANet(nn.Module):
 
         # <<<<<<<<<< DECODER
         for mlp in self.decoder:
-            neighbors, _ = knns(
+            neighbors, _ = knn(
                 coords[:,:N//decimation_ratio].cpu().contiguous(), # original set
                 coords[:,:d*N//decimation_ratio].cpu().contiguous(), # upsampled set
                 1
