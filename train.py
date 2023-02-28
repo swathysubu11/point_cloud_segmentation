@@ -207,7 +207,7 @@ if __name__ == '__main__':
                         default='data/s3dis/subsampled')
 
     expr.add_argument('--epochs', type=int, help='number of epochs',
-                        default=2)
+                        default=50)
     expr.add_argument('--load', type=str, help='model to load',
                         default='')
 
@@ -238,7 +238,7 @@ if __name__ == '__main__':
     misc.add_argument('--name', type=str, help='name of the experiment',
                         default=None)
     misc.add_argument('--num_workers', type=int, help='number of threads for loading data',
-                        default=0)
+                        default=4)
     misc.add_argument('--save_freq', type=int, help='frequency of saving checkpoints',
                         default=10)
 
