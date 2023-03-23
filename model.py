@@ -107,9 +107,9 @@ class LocalSpatialEncoding(nn.Module):
 class AttentivePooling(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(AttentivePooling, self).__init__()
-
+        print(in_channels, out_channels)
         self.score_fn = nn.Sequential(
-            nn.Linear(in_channels, in_channels, bias=False),
+            nn.Linear(in_channels // 2, in_channels // 2 , bias=False),
             nn.Softmax(dim=-2)
         )
         self.mlp = SharedMLP(in_channels, out_channels, bn=True, activation_fn=nn.ReLU())
@@ -127,10 +127,16 @@ class AttentivePooling(nn.Module):
             torch.Tensor, shape (B, d_out, N, 1)
         """
         # computing attention scores
-        scores = self.score_fn(x.permute(0,2,3,1)).permute(0,3,1,2)
+        y = torch.nn.AvgPool2d(kernel_size=(1, 2), stride=(1, 2))
+        print(y(x).shape, x.shape)
+        z= y(x.permute(0, 3, 2, 1)).permute(0, 3, 2, 1)
+        print(z.shape, 'z')
+        scores = self.score_fn(z.permute(0,2,3,1)).permute(0,3,1,2)
+        print(scores.shape)
+
 
         # sum over the neighbors
-        features = torch.sum(scores * x, dim=-1, keepdim=True) # shape (B, d_in, N, 1)
+        features = torch.sum(scores * z, dim=-1, keepdim=True) # shape (B, d_in, N, 1)
 
         return self.mlp(features)
 
@@ -246,11 +252,12 @@ class RandLANet(nn.Module):
         """
         N = input.size(1)
         d = self.decimation
-
+        print('input_size:',N,'d:',d)
         coords = input[...,:3].clone().cpu()
+        print(coords.shape,'coords')
         x = self.fc_start(input).transpose(-2,-1).unsqueeze(-1)
         x = self.bn_start(x) # shape (B, d, N, 1)
-
+        print(x.shape,'x')
         decimation_ratio = 1
 
         # <<<<<<<<<< ENCODER
@@ -259,6 +266,7 @@ class RandLANet(nn.Module):
         permutation = torch.randperm(N)
         coords = coords[:,permutation]
         x = x[:,:,permutation]
+        print(x.shape,'x after permutation')
 
         for lfa in self.encoder:
             # at iteration i, x.shape = (B, N//(d**i), d_in)
